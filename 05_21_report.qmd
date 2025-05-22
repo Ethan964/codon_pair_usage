@@ -1,0 +1,18 @@
+---
+title: 'Preliminary Report on Codon Pairing Usage'
+author: 'Ethan Long'
+toc: true
+number-sections: true
+highlight-style: pygments
+format: 
+  pdf: 
+    documentclass: article
+    number-sections: true
+    toc: true
+    geometry:
+      - top=30mm
+      - left=20mm
+    html:
+      code-fold: true
+      html-math-method: katex
+---
