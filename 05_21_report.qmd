@@ -18,6 +18,7 @@ format:
 ---
 
 [^dataset]: Final-filtered-mut-netphos.csv
+[^score]: Percent chance to produce a phosphorylation event
 
 # Introduction
 
@@ -61,3 +62,54 @@ and exporing the relationships between each variable.
 
 ## Dataset Structure
 
+The dataset[^dataset] contains 43,424 rows and 7 primary columns, including 
+mutation positision (pos), wild-type (wt), and mutant residues (mut), 
+associated kinase type (kinase), and a classification label 'answer'. The data
+appears to be well-structure and uniformly formatted.
+
+
+## Preprocessing Summary
+
+The 'answer' column was found to contain string values such as 'YES' and '.'.
+It was cleaned and converted to binary values, 0 and 1, respectively to enable 
+classification. Column types were inspected, and non-numeric fields were
+confirmed to be categorical and thus encoded into dummy variables. 
+
+
+## Categorircal Feature Exploration
+
+Bar plots and frequency counts were used to inspect the distribution of values
+for categorical columns 'kinase', 'wt', and 'mut'. Common values included
+kinase types: 'PKA', 'PKC', 'CDC2', and 'unsp'. There were always a handful of
+values that presented themselves more commonly than others which guided later 
+encoding strategies and modeling analysis. 
+
+## Feature Inspection and Leakage Detection
+
+Initial exploratory plotting included box-and-whisker plots to visualize the 
+distribution of key numerical features across the target label ('answer').
+A boxplot of 'score'[^score] by 'answer' revealed a clear seperation between
+the two classes, indicating a strong, positive correlation between the 'score'
+value and the target. 
+
+This prompted further inspection using correlation statistics, confirming that
+'score' was highly predictive of 'answer'. It's inclusion in the feature set for
+models was deemed a form of data leakage. The variable was omitted from all
+modeling pipelines to ensure unbiased models except for one instance proving
+this hypothesis. 
+
+
+```{python}
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+feather_path = '../JacobSubset/filtered/mut/final-filtered-mut-netphos.feather'
+df_feather = pd.read_feather(feather_path)
+df_feather['answer'] = df_feather['answer'].apply(lambda x: 1 if str(x).strip().upper() == 'YES' else 0).astype(int)
+sns.boxplot(data=df_feather, x='answer', y='score')
+plt.title('Distribution of Score by Answer Class')
+plt.show
+
+```
