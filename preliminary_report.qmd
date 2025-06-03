@@ -1,0 +1,153 @@
+---
+title: 'Codon Pairing Usage Model Summary'
+author: 'Ethan Long'
+toc: true
+number-sections: true
+highlight-style: pygments
+format: 
+  pdf: 
+    documentclass: article
+    number-sections: true
+    toc: true
+    geometry:
+      - top=30mm
+      - left=20mm
+    html:
+      code-fold: true
+      html-math-method: katex
+---
+
+# Background & Objective
+
+This report summarrizes our first modeling effort aimed at predicting
+phosphorylation events based on sequence-level features. The objetive was to 
+build a binary classification model that uses variables from the 
+'final_filtered_mut_netphos.csv' dataset. The target variable that we are 
+trying to predict is 'Answer', a binary outcome where: 
+
++ 'Yes' = predicted phosphorylation event
++ 'No' = no predicted phosphorylation event
+
+# Feature Definitions & Dataset Observations
+
+We explored several key variables and transformed them to ensure compatability
+with machine learning models:
+
++ Kinase, Mut, WT: Dummy Variables
+
+These categorical variables were converted into dummy variables. A dummy 
+variable is a binary indicator (0, 1) representing the presence or absence of a
+particular category. For example, the kinase "PKC" would be represented as a 
+column kinase_PKC = 1 if the row involves PKC, 0 otherwise. This allows machine
+learning models like Random Forest and XGBoost to process categorical variables
+which would otherwise be impossible. 
+
++ Position: 
+
+Initially, this feature seemed promising as certain sequence locations may
+inherently be more prone to phosphorylation. However, during exploratory 
+analysis, we observed that position is highly predictive, bordering 
+deterministic. This raised concerns of data leakage, where the model learns to 
+to associate certain 'positions' with the label in a way that wouldn't 
+generalize. It's as if the model takes a shortcut to learning about a dataset 
+that could stunt its growth in learning about other variables. It's likely that
+position-specific patterns tied to the training set were being memorized, not
+learned. As a result, this variable was omitted from the final model. 
+
++ Score: 
+
+We found this continuous variable could alone predict the 'Answer' label with
+extremely high accuracy, essentially replicating the label. Including 'Score'
+would have led the model to not learn about any of the predictive natures of 
+the other features, offering no new insight to our project. Therefore we
+excluded 'Score' to focus on independent features and preserve our model's 
+integrity. 
+
+# Class Imbalance
+
+Since our dataset contained far more 'No' phosphorylation events than 'Yes'
+phosphorylation events, we used SMOTE (Synthetic Minority Oversampling 
+Technique) to address what we call a class imbalance. This method generates
+synthetic examples of the minority class to balance the dataset, helping the
+model better learn the patterns associated with phosphorylation events. If 
+this problem is not addressed, what often happens is our model will gain 
+deficiencies in the ability to correcty classify the minority class, but masks
+this deficiency with a high overall accuracy due to more often than not
+guessing the majority class. 
+
+
+
+
+
+# Modeling Approach
+
+After addressing the class imbalance, we trained two tree-based models:
+
++ Random Forest 
++ XGBoost (Extreme Gradient Boosting)
+
+These algorithms build ensembles of decision trees to learn non-linear patterns
+and interacions between variables.
+
+# Evaluation Metrics
+
+We used several standard evaluation metrics:
+
++ Accuracy: Precentage of total predictions that were correct.
+
++ Precision: Of predicted 'yes' (phosphorylation) cases, how many were actually
+correct? 
+
++ Recall: Of predicted 'yes' (phosphorylation) cases, how many did we correctly
+catch? 
+
++ F1-Score: A balancxe between precision and recall.
+
++ ROC AUC (Receiver Operating Ccharacteristic): Measures the model's ability to
+distinguish between classes
+    + 1.0 - perfect
+    + 0.5 - coin flip
+
+Each metrics is reported seperately for:
++ Class 0 = no phosphorylation 
++ Class 1 = phosphorylation occurs
+
+# Results & Model Comparison
+
+## Random Forest (with 'Pos')
+
+| Class | Precision | Recall | F1-Score | 
+| 0 (no) | 0.85 | 0.81 | 0.83 | 
+| 1 (yes) | 0.82 | 0.85 | 0.84 |
+| Accuracy | 0.83
+| ROC-AUC | 0.91
+
+
+## Random Forest Without 'Pos'
+
+| Class | Precision | Recall | F1-Score | 
+| 0 (no) | 0.87 | 0.76 | 0.81 | 
+| 1 (yes) | 0.79 | 0.89 | 0.84 |
+| Accuracy | 0.83
+| ROC-AUC | 0.89
+
+## XGBoost on Oversampled Data
+
+| Class | Precision | Recall | F1-Score | 
+| 0 (no) | 0.87 | 0.76 | 0.81 | 
+| 1 (yes) | 0.79 | 0.89 | 0.83 |
+| Accuracy | 0.82
+| ROC-AUC | 0.89
+
+# Questions
+
++ Is the uniform distribution of kinase types an intentional design choice, or 
+a result of how the data was selected or filtered?
++ Is there a biological threshold for interpreting 'Score' values? For 
+example, does a value above 50% indicate a high confidence in a phosphorylation
+event occuring?
++ Why are only 2 wild-types represented,  while all kinase types appear with
+roughly equal frequency? 
++ Is Position a critical piece to this project, or can we safely exclude it from
+modeling without undermining the project's goals? 
+it from modeling? 
