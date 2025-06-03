@@ -105,10 +105,11 @@ catch?
 
 + ROC AUC (Receiver Operating Ccharacteristic): Measures the model's ability to
 distinguish between classes
-    + 1.0 - perfect
-    + 0.5 - coin flip
+  + 1.0 - perfect
+  + 0.5 - coin flip
 
 Each metrics is reported seperately for:
+
 + Class 0 = no phosphorylation 
 + Class 1 = phosphorylation occurs
 
@@ -117,6 +118,7 @@ Each metrics is reported seperately for:
 ## Random Forest (with 'Pos')
 
 | Class | Precision | Recall | F1-Score | 
+|-----------|-----------|--------|---------------|
 | 0 (no) | 0.85 | 0.81 | 0.83 | 
 | 1 (yes) | 0.82 | 0.85 | 0.84 |
 | Accuracy | 0.83
@@ -126,6 +128,7 @@ Each metrics is reported seperately for:
 ## Random Forest Without 'Pos'
 
 | Class | Precision | Recall | F1-Score | 
+|-----------|-----------|--------|---------------|
 | 0 (no) | 0.87 | 0.76 | 0.81 | 
 | 1 (yes) | 0.79 | 0.89 | 0.84 |
 | Accuracy | 0.83
@@ -134,6 +137,7 @@ Each metrics is reported seperately for:
 ## XGBoost on Oversampled Data
 
 | Class | Precision | Recall | F1-Score | 
+|-----------|-----------|--------|---------------|
 | 0 (no) | 0.87 | 0.76 | 0.81 | 
 | 1 (yes) | 0.79 | 0.89 | 0.83 |
 | Accuracy | 0.82
