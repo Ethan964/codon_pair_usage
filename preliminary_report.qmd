@@ -33,14 +33,13 @@ trying to predict is 'Answer', a binary outcome where:
 We explored several key variables and transformed them to ensure compatability
 with machine learning models:
 
-+ Kinase, Mut, WT: Dummy Variables
++ Kinase, Mut, WT (Dummy Variables):
 
 These categorical variables were converted into dummy variables. A dummy 
 variable is a binary indicator (0, 1) representing the presence or absence of a
 particular category. For example, the kinase "PKC" would be represented as a 
 column kinase_PKC = 1 if the row involves PKC, 0 otherwise. This allows machine
-learning models like Random Forest and XGBoost to process categorical variables
-which would otherwise be impossible. 
+learning models to handle these categorical inputs effectively. 
 
 + Position: 
 
@@ -48,46 +47,65 @@ Initially, this feature seemed promising as certain sequence locations may
 inherently be more prone to phosphorylation. However, during exploratory 
 analysis, we observed that position is highly predictive, bordering 
 deterministic. This raised concerns of data leakage, where the model learns to 
-to associate certain 'positions' with the label in a way that wouldn't 
-generalize. It's as if the model takes a shortcut to learning about a dataset 
-that could stunt its growth in learning about other variables. It's likely that
-position-specific patterns tied to the training set were being memorized, not
-learned. As a result, this variable was omitted from the final model. 
+to 'memorize' certain 'positions' affecting phosphorylation outcomes, limiting 
+the model's ability to learn and pick up trends within the data. Due to this
+reasoning 'position' was excluded from final models to ensure the integrity of 
+our model.
 
 + Score: 
 
 We found this continuous variable could alone predict the 'Answer' label with
 extremely high accuracy, essentially replicating the label. Including 'Score'
-would have led the model to not learn about any of the predictive natures of 
-the other features, offering no new insight to our project. Therefore we
-excluded 'Score' to focus on independent features and preserve our model's 
-integrity. 
+would have led the model to fall in the same trap that including 'pos' creates.
+We removed 'Score' to keep the model independent from this metric and ensure
+the integrity of the findings of our model. 
 
-# Class Imbalance
-
-Since our dataset contained far more 'No' phosphorylation events than 'Yes'
-phosphorylation events, we used SMOTE (Synthetic Minority Oversampling 
-Technique) to address what we call a class imbalance. This method generates
-synthetic examples of the minority class to balance the dataset, helping the
-model better learn the patterns associated with phosphorylation events. If 
-this problem is not addressed, what often happens is our model will gain 
-deficiencies in the ability to correcty classify the minority class, but masks
-this deficiency with a high overall accuracy due to more often than not
-guessing the majority class. 
+# Modeling Approach 
 
 
+## What Goes In (Inputs)
+
+After preprocessing, each data point or instance represents a case where
+either phosphorylation occurs or not. This includes a select set of features
+including:
+
++ **Dummy Variables** indicating the presence of a specific kinase, wild-type,
+or mutation
+
++ Other numerical or structural features that model uses to learn
+  + First iteration of models included 'score' or 'pos' 
 
 
+## What Happens (Model Training)
 
-# Modeling Approach
+We trained two types of tree-bsed ensemble models:
 
-After addressing the class imbalance, we trained two tree-based models:
++ **Random Forest** which builds numerous decision trees on random sections of
+the dataset. The model has each tree learn from a simple 'if then' procedure. 
 
-+ Random Forest 
-+ XGBoost (Extreme Gradient Boosting)
+An example of this could look like: If 'kinase_PKA' and 'Mut_A', then 'Answer' = YES
 
-These algorithms build ensembles of decision trees to learn non-linear patterns
-and interacions between variables.
+
++ **XGBoost (Extreme Gradient Boosting)** builds trees one at a time, where each
+new tree tries to correct the mistakes made by the previous ones. It can be
+more useful to use on data that can be harder to classify, but performs better
+on structured data.
+
+In both models, SMOTE (Synthetic Minority Oversampling Technique) was applied 
+before training to balance the class sizes. This ensures the model isn't 
+learning to always predict the majority class ('no' phosphorylation).
+
+## What Comes Out (Results)
+
+Each model outputs two results for each instance:
+
++ A prediction: either a 'yes' or 'no'
+
++ A probability score: a number between 0 and 1 indicating the model's confidence
+in it's prediction
+
+We then compare these predictions to the true labels of each instance to calculate
+metrics like precision, recall, accuracy, and ROC AUC. 
 
 # Evaluation Metrics
 
