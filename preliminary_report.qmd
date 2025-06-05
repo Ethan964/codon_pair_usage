@@ -22,7 +22,7 @@ format:
 This report summarrizes our first modeling effort aimed at predicting
 phosphorylation events based on sequence-level features. The objetive was to 
 build a binary classification model that uses variables from the 
-'final_filtered_mut_netphos.csv' dataset. The target variable that we are 
+'final-filtered-mut-netphos.csv' dataset. The target variable that we are 
 trying to predict is 'Answer', a binary outcome where: 
 
 + 'Yes' = predicted phosphorylation event
@@ -45,12 +45,13 @@ learning models to handle these categorical inputs effectively.
 
 Initially, this feature seemed promising as certain sequence locations may
 inherently be more prone to phosphorylation. However, during exploratory 
-analysis, we observed that position is highly predictive, bordering 
+analysis, we observed that position was highly predictive, bordering 
 deterministic. This raised concerns of data leakage, where the model learns to 
 to 'memorize' certain 'positions' affecting phosphorylation outcomes, limiting 
-the model's ability to learn and pick up trends within the data. Due to this
-reasoning 'position' was excluded from final models to ensure the integrity of 
-our model.
+the model's ability to learn and pick up trends within the data. To account for
+this, we conducted modeling both with and without position. This allows us to 
+compare performance and retain flexibility in case position turns out to be 
+essential for intepretation in later stages of the study.
 
 + Score: 
 
@@ -78,7 +79,7 @@ or mutation
 
 ## What Happens (Model Training)
 
-We trained two types of tree-bsed ensemble models:
+We trained two types of tree-based ensemble models:
 
 + **Random Forest** which builds numerous decision trees on random sections of
 the dataset. The model has each tree learn from a simple 'if then' procedure. 
@@ -88,7 +89,7 @@ An example of this could look like: If 'kinase_PKA' and 'Mut_A', then 'Answer' =
 
 + **XGBoost (Extreme Gradient Boosting)** builds trees one at a time, where each
 new tree tries to correct the mistakes made by the previous ones. It can be
-more useful to use on data that can be harder to classify, but performs better
+more useful to apply on data that can be harder to classify, but performs better
 on structured data.
 
 In both models, SMOTE (Synthetic Minority Oversampling Technique) was applied 
@@ -119,12 +120,12 @@ correct?
 + Recall: Of predicted 'yes' (phosphorylation) cases, how many did we correctly
 catch? 
 
-+ F1-Score: A balancxe between precision and recall.
++ F1-Score: A balance between precision and recall.
 
-+ ROC AUC (Receiver Operating Ccharacteristic): Measures the model's ability to
++ ROC AUC (Receiver Operating Characteristic): Measures the model's ability to
 distinguish between classes
   + 1.0 - perfect
-  + 0.5 - coin flip
+  + 0.5 - random guessing
 
 Each metrics is reported seperately for:
 
@@ -133,7 +134,7 @@ Each metrics is reported seperately for:
 
 # Results & Model Comparison
 
-## Random Forest (with 'Pos')
+## Random Forest (With 'Pos')
 
 | Class | Precision | Recall | F1-Score | 
 |-----------|-----------|--------|---------------|
@@ -143,7 +144,7 @@ Each metrics is reported seperately for:
 | ROC-AUC | 0.91
 
 
-## Random Forest Without 'Pos'
+## Random Forest (Without 'Pos')
 
 | Class | Precision | Recall | F1-Score | 
 |-----------|-----------|--------|---------------|
@@ -163,6 +164,11 @@ Each metrics is reported seperately for:
 
 # Questions
 
+The initial modeling effort has highlighted both promising results and areas
+where additional clarification would be valuable. To further improve model
+interpretability and performance, we welcome insight on several aspects of the
+dataset's structure, design choices, and biological context. 
+
 + Is the uniform distribution of kinase types an intentional design choice, or 
 a result of how the data was selected or filtered?
 + Is there a biological threshold for interpreting 'Score' values? For 
@@ -172,4 +178,3 @@ event occuring?
 roughly equal frequency? 
 + Is Position a critical piece to this project, or can we safely exclude it from
 modeling without undermining the project's goals? 
-it from modeling? 
